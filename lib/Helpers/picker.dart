@@ -1,18 +1,24 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'dart:html' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-// ignore: avoid_classes_with_only_static_members
 class Picker {
-  static Future<String> selectFolder({
+  PlatformFile file = PlatformFile(name: '', size: 0);
+  String filePath = '';
+  String fileName = '';
+  List<int> fileByte = [];
+
+  Future<void> selectFolder({
     required BuildContext context,
     String? message,
   }) async {
     final String? temp =
         await FilePicker.platform.getDirectoryPath(dialogTitle: message);
-    return (temp == '/' || temp == null) ? '' : temp;
+    filePath = (temp == '/' || temp == null) ? '' : temp;
   }
 
-  static Future<Map<String, List<int>>> selectFile({
+  Future<void> selectFile({
     required BuildContext context,
     required List<String> ext,
     String? message,
@@ -24,12 +30,36 @@ class Picker {
     );
 
     if (result != null) {
-      final List<int> fileBytes =
-          result.files.first.bytes!.toList(growable: false);
-      final String fileName = result.files.first.name;
-
-      return {fileName: fileBytes};
+      file = result.files.first;
     }
-    return {'': []};
+  }
+
+  Future<bool> loadFile() async {
+    if (fileByte.isNotEmpty) return true;
+    if (file.size > 0) {
+      if (!kIsWeb) filePath = file.path!;
+      fileName = file.name;
+      fileByte = file.bytes!.toList(growable: false);
+      return true;
+    }
+    return false;
+  }
+
+  downloadFile() {
+    // prepare
+    final blob = html.Blob([fileByte]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.document.createElement('a') as html.AnchorElement
+      ..href = url
+      ..style.display = 'none'
+      ..download = fileName;
+    html.document.body!.children.add(anchor);
+
+// download
+    anchor.click();
+
+// cleanup
+    html.document.body!.children.remove(anchor);
+    html.Url.revokeObjectUrl(url);
   }
 }

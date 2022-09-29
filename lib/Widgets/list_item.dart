@@ -26,16 +26,12 @@ class _ListItemState extends State<ListItem> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          alignment: Alignment.center,
-          padding: const EdgeInsets.only(
-            top: 5,
-            bottom: 5,
-            left: 10,
-            right: 10,
-          ),
+        Ink(
+          //alignment: Alignment.center,
+          padding: const EdgeInsets.all(5),
           height: widget.multiline ? 100 : 57.0,
-          width: 200,
+          width: 300,
+
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.0),
             border: Border.all(
@@ -50,17 +46,21 @@ class _ListItemState extends State<ListItem> {
               )
             ],
           ),
-          child: ListTile(
-            dense: true,
+          child: InkWell(
             onTap: () => widget.onPress(),
-            leading: Text(
-              widget.title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  widget.title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                widget.child,
+              ],
             ),
-            trailing: widget.child,
           ),
         ),
         Visibility(

@@ -13,7 +13,8 @@ class LocalFile extends StatefulWidget {
 }
 
 class _LocalFileState extends State<LocalFile> {
-  Map<String, List<int>> file = {'': []};
+  Picker uploadPicker = Picker();
+  Picker downloadPicker = Picker();
 
   @override
   void initState() {
@@ -24,35 +25,62 @@ class _LocalFileState extends State<LocalFile> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ListItem(
-          //title: AppLocalizations.of(context)!.onlyMP3,
-          //errorMsg: errorMsg['song']!,
-          //error: displayErrorMsg['song']!,
-          onPress: () => pickFile(),
-          child: file.keys.first.trim() == ''
-              ? const Icon(
-                  Icons.cloud_upload,
-                )
-              : Text(
-                  file.keys.first,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Theme.of(context).textTheme.bodyText1!.color,
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListItem(
+            title: "Upload ", //AppLocalizations.of(context)!.onlyMP3,
+            //errorMsg: errorMsg['song']!,
+            //error: displayErrorMsg['song']!,
+            onPress: () => pickFile(),
+            child: uploadPicker.fileName.trim() == ''
+                ? const Icon(
+                    Icons.cloud_upload,
+                  )
+                : Text(
+                    uploadPicker.fileName,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).textTheme.bodyText1!.color,
+                    ),
                   ),
-                ),
+          ),
         ),
-        if (file.values.first.isNotEmpty) Player(bytes: file.values.first),
-        if (file.values.first.isNotEmpty)
+        if (uploadPicker.file.size > 0) const Text("Original:"),
+        if (uploadPicker.file.size > 0)
+          FutureBuilder(
+              future: uploadPicker.loadFile(),
+              builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+                if (snapshot.hasData && snapshot.data!) {
+                  return Player(bytes: uploadPicker.fileByte);
+                } else {
+                  return const Padding(
+                    padding: EdgeInsets.all(15),
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              }),
+        if (uploadPicker.fileByte.isNotEmpty) const Text("Processed:"),
+        if (uploadPicker.fileByte.isNotEmpty)
           FutureBuilder<List<int>>(
               future: matchering(
-                  file.values.first,
-                  file.keys
-                      .first), // a previously-obtained Future<String> or null
+                  uploadPicker.fileByte,
+                  uploadPicker
+                      .fileName), // a previously-obtained Future<String> or null
               builder:
                   (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
                 if (snapshot.hasData) {
-                  return Player(bytes: snapshot.data!);
+                  downloadPicker.fileName = uploadPicker.fileName;
+                  downloadPicker.fileByte = snapshot.data!;
+                  return Column(
+                    children: [
+                      Player(bytes: snapshot.data!),
+                      ListItem(
+                          title: "Download", //AppLocalizations.of(context)!
+                          onPress: () => downloadPicker.downloadFile(),
+                          child: const Icon(Icons.download))
+                    ],
+                  );
                 } else if (snapshot.hasError) {
                   return Row(children: [
                     const Icon(
@@ -66,9 +94,8 @@ class _LocalFileState extends State<LocalFile> {
                     ),
                   ]);
                 } else {
-                  return const SizedBox(
-                    width: 60,
-                    height: 60,
+                  return const Padding(
+                    padding: EdgeInsets.all(15),
                     child: CircularProgressIndicator(),
                   )
                       //Padding(
@@ -84,18 +111,16 @@ class _LocalFileState extends State<LocalFile> {
 
   Future<void> pickFile() async {
     setState(() {
-      file = {'': []};
+      uploadPicker = Picker();
     });
     try {
-      var result = await Picker.selectFile(
+      await uploadPicker.selectFile(
         context: context,
-        ext: ['mp3'],
+        ext: ['mp3', 'wav'],
         //message: AppLocalizations.of(context)!.selectBackFile,
       );
 
-      setState(() {
-        file = result;
-      });
+      setState(() {});
     } catch (e) {
       print('Error in pickFile: $e');
     }
