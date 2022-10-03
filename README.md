@@ -1,6 +1,6 @@
 # matchering_ui
 
-A new Flutter project.
+A Flutter front-end webApp demo for using my matchering API
 
 ## Getting Started
 
