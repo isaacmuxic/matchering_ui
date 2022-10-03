@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 
 Future<List<int>> matchering(List<int> bytes, String name) async {
@@ -22,7 +20,8 @@ Future<List<int>> matchering(List<int> bytes, String name) async {
     );
     return response.data!; // as List<int>;
   } on DioError catch (e) {
-    throw Exception(e.response!.data ?? e.response!.statusCode);
+    throw Exception(e.response!.data != null
+        ? String.fromCharCodes(e.response!.data)
+        : e.response!.statusCode);
   }
-  return [];
 }
