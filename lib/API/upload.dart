@@ -22,7 +22,7 @@ Future<List<int>> matchering(List<int> bytes, String name) async {
     );
     return response.data!; // as List<int>;
   } on DioError catch (e) {
-    throw Exception(e.response!.statusCode);
+    throw Exception(e.response!.data ?? e.response!.statusCode);
   }
   return [];
 }

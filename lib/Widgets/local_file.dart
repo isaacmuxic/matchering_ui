@@ -32,12 +32,12 @@ class _LocalFileState extends State<LocalFile> {
             //errorMsg: errorMsg['song']!,
             //error: displayErrorMsg['song']!,
             onPress: () => pickFile(),
-            child: uploadPicker.fileName.trim() == ''
+            child: uploadPicker.file.name.trim() == ''
                 ? const Icon(
                     Icons.cloud_upload,
                   )
                 : Text(
-                    uploadPicker.fileName,
+                    uploadPicker.file.name,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 16,

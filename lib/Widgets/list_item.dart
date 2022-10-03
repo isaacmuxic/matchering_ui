@@ -58,7 +58,7 @@ class _ListItemState extends State<ListItem> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                widget.child,
+                Expanded(child: widget.child),
               ],
             ),
           ),
