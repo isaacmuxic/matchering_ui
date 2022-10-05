@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import 'list_item.dart';
@@ -15,6 +16,7 @@ class LocalFile extends StatefulWidget {
 class _LocalFileState extends State<LocalFile> {
   Picker uploadPicker = Picker();
   Picker downloadPicker = Picker();
+  bool startProcess = false;
 
   @override
   void initState() {
@@ -52,7 +54,14 @@ class _LocalFileState extends State<LocalFile> {
               future: uploadPicker.loadFile(),
               builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
                 if (snapshot.hasData && snapshot.data!) {
-                  return Player(bytes: uploadPicker.fileByte);
+                  return Column(
+                    children: [
+                      Player(bytes: uploadPicker.fileByte),
+                      ListItem(
+                          onPress: () => _process(),
+                          child: const Center(child: Text("Start process")))
+                    ],
+                  );
                 } else {
                   return const Padding(
                     padding: EdgeInsets.all(15),
@@ -60,8 +69,12 @@ class _LocalFileState extends State<LocalFile> {
                   );
                 }
               }),
-        if (uploadPicker.fileByte.isNotEmpty) const Text("Processed:"),
-        if (uploadPicker.fileByte.isNotEmpty)
+        if (uploadPicker.fileByte.isNotEmpty && startProcess)
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text("Processed:"),
+          ),
+        if (uploadPicker.fileByte.isNotEmpty && startProcess)
           FutureBuilder<List<int>>(
               future: matchering(
                   uploadPicker.fileByte,
@@ -72,6 +85,7 @@ class _LocalFileState extends State<LocalFile> {
                 if (snapshot.hasData) {
                   downloadPicker.fileName = uploadPicker.fileName;
                   downloadPicker.fileByte = snapshot.data!;
+                  startProcess = false;
                   return Column(
                     children: [
                       Player(bytes: snapshot.data!),
@@ -120,9 +134,17 @@ class _LocalFileState extends State<LocalFile> {
         //message: AppLocalizations.of(context)!.selectBackFile,
       );
 
-      setState(() {});
+      setState(() {
+        startProcess = false;
+      });
     } catch (e) {
       print('Error in pickFile: $e');
     }
+  }
+
+  _process() {
+    setState(() {
+      startProcess = true;
+    });
   }
 }
