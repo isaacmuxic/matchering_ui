@@ -17,6 +17,7 @@ class _LocalFileState extends State<LocalFile> {
   Picker uploadPicker = Picker();
   Picker downloadPicker = Picker();
   bool startProcess = false;
+  bool checkBypassEQ = false;
 
   @override
   void initState() {
@@ -27,25 +28,27 @@ class _LocalFileState extends State<LocalFile> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListItem(
-            title: "Upload ", //AppLocalizations.of(context)!.onlyMP3,
-            //errorMsg: errorMsg['song']!,
-            //error: displayErrorMsg['song']!,
-            onPress: () => pickFile(),
-            child: uploadPicker.file.name.trim() == ''
-                ? const Icon(
-                    Icons.cloud_upload,
-                  )
-                : Text(
-                    uploadPicker.file.name,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).textTheme.bodyText1!.color,
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListItem(
+              title: "Upload ", //AppLocalizations.of(context)!.onlyMP3,
+              //errorMsg: errorMsg['song']!,
+              //error: displayErrorMsg['song']!,
+              onPress: () => pickFile(),
+              child: uploadPicker.file.name.trim() == ''
+                  ? const Icon(
+                      Icons.cloud_upload,
+                    )
+                  : Text(
+                      uploadPicker.file.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).textTheme.bodyText1!.color,
+                      ),
                     ),
-                  ),
+            ),
           ),
         ),
         if (uploadPicker.file.size > 0) const Text("Original:"),
@@ -57,6 +60,17 @@ class _LocalFileState extends State<LocalFile> {
                   return Column(
                     children: [
                       Player(bytes: uploadPicker.fileByte),
+                      SizedBox(
+                        width: 300,
+                        child: CheckboxListTile(
+                            title: const Text("Bypass Auto EQ: "),
+                            value: checkBypassEQ,
+                            onChanged: (b) => {
+                                  setState(() {
+                                    checkBypassEQ = b!;
+                                  })
+                                }),
+                      ),
                       ListItem(
                           onPress: () => _process(),
                           child: const Center(child: Text("Start process")))
@@ -69,32 +83,27 @@ class _LocalFileState extends State<LocalFile> {
                   );
                 }
               }),
-        if (uploadPicker.fileByte.isNotEmpty && startProcess)
+        if (uploadPicker.fileByte.isNotEmpty &&
+            (startProcess || downloadPicker.fileByte.isNotEmpty))
           const Padding(
             padding: EdgeInsets.all(8.0),
             child: Text("Processed:"),
           ),
-        if (uploadPicker.fileByte.isNotEmpty && startProcess)
+        if (uploadPicker.fileByte.isNotEmpty &&
+            (startProcess || downloadPicker.fileByte.isNotEmpty))
           FutureBuilder<List<int>>(
-              future: matchering(
-                  uploadPicker.fileByte,
-                  uploadPicker
-                      .fileName), // a previously-obtained Future<String> or null
+              future: startProcess
+                  ? matchering(uploadPicker.fileByte, uploadPicker.fileName,
+                      checkBypassEQ)
+                  : null, // Future or null
               builder:
                   (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.connectionState == ConnectionState.done ||
+                    snapshot.connectionState == ConnectionState.none) {
                   downloadPicker.fileName = uploadPicker.fileName;
                   downloadPicker.fileByte = snapshot.data!;
                   startProcess = false;
-                  return Column(
-                    children: [
-                      Player(bytes: snapshot.data!),
-                      ListItem(
-                          title: "Download", //AppLocalizations.of(context)!
-                          onPress: () => downloadPicker.downloadFile(),
-                          child: const Icon(Icons.download))
-                    ],
-                  );
+                  return _downloader();
                 } else if (snapshot.hasError) {
                   return Row(children: [
                     const Icon(
@@ -147,5 +156,17 @@ class _LocalFileState extends State<LocalFile> {
       downloadPicker = Picker();
       startProcess = true;
     });
+  }
+
+  Widget _downloader() {
+    return Column(
+      children: [
+        Player(bytes: downloadPicker.fileByte),
+        ListItem(
+            title: "Download", //AppLocalizations.of(context)!
+            onPress: () => downloadPicker.downloadFile(),
+            child: const Icon(Icons.download))
+      ],
+    );
   }
 }

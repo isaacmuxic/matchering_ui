@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-Future<List<int>> matchering(List<int> bytes, String name) async {
+Future<List<int>> matchering(List<int> bytes, String name, bool noEQ) async {
   final dio = Dio(BaseOptions(
     //baseUrl: '',
     headers: {
@@ -14,7 +14,7 @@ Future<List<int>> matchering(List<int> bytes, String name) async {
     Response response = await dio.post(
       'http://20.255.62.78/main-app/matchering',
       data: FormData.fromMap(
-        {'song': MultipartFile.fromBytes(bytes, filename: name)},
+        {'song': MultipartFile.fromBytes(bytes, filename: name), 'noEQ': noEQ},
       ),
       options: Options(responseType: ResponseType.bytes),
     );
