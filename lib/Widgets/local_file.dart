@@ -82,7 +82,7 @@ class _LocalFileState extends State<LocalFile> {
                       .fileName), // a previously-obtained Future<String> or null
               builder:
                   (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
-                if (snapshot.hasData) {
+                if (snapshot.connectionState == ConnectionState.done) {
                   downloadPicker.fileName = uploadPicker.fileName;
                   downloadPicker.fileByte = snapshot.data!;
                   startProcess = false;
@@ -144,6 +144,7 @@ class _LocalFileState extends State<LocalFile> {
 
   _process() {
     setState(() {
+      downloadPicker = Picker();
       startProcess = true;
     });
   }
