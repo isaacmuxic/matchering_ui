@@ -93,8 +93,8 @@ class _LocalFileState extends State<LocalFile> {
             (startProcess || downloadPicker.fileByte.isNotEmpty))
           FutureBuilder<List<int>>(
               future: startProcess
-                  ? matchering(uploadPicker.fileByte, uploadPicker.fileName,
-                      checkBypassEQ)
+                  ? matchering(context, uploadPicker.fileByte,
+                      uploadPicker.fileName, checkBypassEQ)
                   : null, // Future or null
               builder:
                   (BuildContext context, AsyncSnapshot<List<int>> snapshot) {

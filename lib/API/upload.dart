@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
 
-Future<List<int>> matchering(List<int> bytes, String name, bool noEQ) async {
+Future<List<int>> matchering(
+    BuildContext context, List<int> bytes, String name, bool noEQ) async {
   final dio = Dio(BaseOptions(
     //baseUrl: '',
     headers: {
@@ -11,8 +14,11 @@ Future<List<int>> matchering(List<int> bytes, String name, bool noEQ) async {
     },
   ));
   try {
+    final jsonString =
+        await DefaultAssetBundle.of(context).loadString('assets/config.json');
+    final dynamic jsonMap = jsonDecode(jsonString);
     Response response = await dio.post(
-      'http://20.255.62.78/main-app/matchering',
+      jsonMap['url'],
       data: FormData.fromMap(
         {'song': MultipartFile.fromBytes(bytes, filename: name), 'noEQ': noEQ},
       ),
