@@ -2,6 +2,9 @@
 
 A Flutter front-end webApp demo for using my matchering API
 
+Replace the "url" field in assets/config.json with your actual hosting of the matchering back-end main-app.py in my fork "https://github.com/isaacmuxic/matchering"
+
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
